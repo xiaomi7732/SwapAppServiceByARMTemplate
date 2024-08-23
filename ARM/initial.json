@@ -1,0 +1,37 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "sites_SwapAPIDemo_name": {
+      "defaultValue": "SwapAPIDemo",
+      "type": "String"
+    }
+  },
+  "variables": {
+    "location": "WestUS3"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-02-01",
+      "name": "[parameters('sites_SwapAPIDemo_name')]",
+      "location": "[variables('location')]",
+      "kind": "app",
+      "properties": {},
+      "resources": [
+        {
+          "type": "Extensions",
+          // "apiVersion": "2022-09-01",
+          "apiVersion": "2020-12-01",
+          "name": "MSDeploy",
+          "properties": {
+            "packageUri": "https://xm7732public.blob.core.windows.net/public/arm-swap-examples/v1.zip"
+          },
+          "dependsOn": [
+            "[concat('Microsoft.Web/sites/', parameters('sites_SwapAPIDemo_name'))]"
+          ]
+        }
+      ]
+    }
+  ]
+}
