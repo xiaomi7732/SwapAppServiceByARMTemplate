@@ -26,8 +26,8 @@ https://xm7732public.blob.core.windows.net/public/arm-swap-examples/v2.zip
 ```
 
 ```shell
-az group create -n $rgName --location "West US 3"
-az deployment group create -n swapdemo -g $rgName --template-file .\deploy.json
+$rgName="Swap-example-2"
+az group create -n $rgName --location "West US"
 ```
 
 ```json

@@ -1,36 +1,62 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "sites_SwapAPIDemo_name": {
-      "defaultValue": "SwapAPIDemo",
+    "siteName": {
+      "defaultValue": "SwapAPIDemoV2",
       "type": "String"
     }
   },
   "variables": {
-    "location": "WestUS3"
+    "location": "West US",
+    "servicePlanName": "[concat(parameters('siteName'), '-plan')]"
   },
   "resources": [
     {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('servicePlanName')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "P1V3"
+      },
+      "kind": "linux",
+      "properties": {
+        "reserved": true
+      }
+    },
+    {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2018-02-01",
-      "name": "[parameters('sites_SwapAPIDemo_name')]",
+      "name": "[parameters('siteName')]",
       "location": "[variables('location')]",
       "kind": "app",
-      "properties": {},
+      "sku": {
+        "name": "S1"
+      },
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]",
+        "siteConfig":{
+          "linuxFxVersion": "DOTNETCORE|8.0"
+        }
+      },
       "resources": [
         {
           "type": "Extensions",
           // "apiVersion": "2022-09-01",
           "apiVersion": "2020-12-01",
-          "name": "MSDeploy",
+          "name": "onedeploy",
           "properties": {
-            "packageUri": "https://xm7732public.blob.core.windows.net/public/arm-swap-examples/v1.zip"
+            "packageUri": "https://xm7732public.blob.core.windows.net/public/arm-swap-examples/v1.zip",
+            "type": "zip"
           },
           "dependsOn": [
-            "[concat('Microsoft.Web/sites/', parameters('sites_SwapAPIDemo_name'))]"
+            "[concat('Microsoft.Web/sites/', parameters('siteName'))]"
           ]
         }
+      ],
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]"
       ]
     }
   ]
