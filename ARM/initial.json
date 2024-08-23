@@ -8,7 +8,7 @@
     }
   },
   "variables": {
-    "location": "West US",
+    "location": "[resourceGroup().location]",
     "servicePlanName": "[concat(parameters('siteName'), '-plan')]"
   },
   "resources": [
