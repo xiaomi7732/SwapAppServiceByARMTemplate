@@ -31,9 +31,6 @@
       "name": "[parameters('siteName')]",
       "location": "[variables('location')]",
       "kind": "app",
-      "sku": {
-        "name": "S1"
-      },
       "properties": {
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('servicePlanName'))]",
         "siteConfig":{
@@ -43,8 +40,7 @@
       "resources": [
         {
           "type": "Extensions",
-          // "apiVersion": "2022-09-01",
-          "apiVersion": "2020-12-01",
+          "apiVersion": "2022-09-01",
           "name": "onedeploy",
           "properties": {
             "packageUri": "https://xm7732public.blob.core.windows.net/public/arm-swap-examples/v1.zip",
