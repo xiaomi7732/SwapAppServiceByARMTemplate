@@ -1,79 +1,83 @@
-# Swap App Service Slots with ARM Templates: A Step-by-Step Guide
+# Swapping App Service Slots with ARM Templates: A Step-by-Step Guide
 
-In my previous post, we covered [how to deploy an application to an app service](./Readme.md), and [how to deploy an application to a slot](./DeployToSlot.md). In this post, we will look into how to swap them.
+In my previous posts, we discussed [how to deploy an application to an Azure App Service](./Readme.md) and [how to deploy an application to a slot](./DeployToSlot.md). In this post, we'll focus on how to swap these slots using ARM templates.
 
-Swap slots by ARM template could be mind boggling at the beginning. This post intend to clear it up. If you prefer to look into the templates on your own, check out [swap.json](./ARM/swap.json) and [swap-combo.json](./ARM/swap-combo.json). Assuming you have deployed an app with a slot, here's an abstraction of how the ARM template works:
+Swapping slots with ARM templates can be complex at first glance, but this guide will clarify the process. If you prefer to examine the templates directly, you can view [swap.json](./ARM/swap.json) and [swap-combo.json](./ARM/swap-combo.json). Assuming you have an app deployed with a slot, here's a high-level overview of how the ARM template works:
 
-1. It set an arbitrary build version to the slot, for example, `Ver.aaa`.
-2. It updates the `Production` with a `targetBuildVersion`, to the same version of `Ver.aaa`.
+1. **Assign a Build Version**: Set a build version (e.g., `Ver.aaa`) to the slot.
+2. **Update Production**: Set the `targetBuildVersion` property of the `Production` environment to the same build version (`Ver.aaa`).
 
-Why? Once a template like that is submitted, ARM will follow the instructions above by:
+**Why?** When you deploy a template like this, ARM follows these steps:
 
-1. Mark slot with the build version of `Ver.aaa`;
-2. Swap the current Production with any slow that with the version - oh, and that happened to be the slot in step 1;
+1. Marks the slot with the build version `Ver.aaa`.
+2. Swaps the current Production environment with the slot that has the version `Ver.aaa`.
 
-So, a minimal swap template will look like this:
+A minimal swap template would look like this:
 
 ```jsonc
 "resources": [
-{
+  {
     "type": "Microsoft.Web/sites/slots",
     "apiVersion": "2018-02-01",
     "name": "[concat(parameters('siteName'), '/staging')]",
     "location": "[variables('location')]",
     "properties": {
-    "buildVersion": "[parameters('sites_buildVersion')]"
+      "buildVersion": "[parameters('sites_buildVersion')]"
     }
-},
-{
+  },
+  {
     "type": "Microsoft.Web/sites",
     "apiVersion": "2018-02-01",
     "name": "[parameters('siteName')]",
     "location": "[variables('location')]",
     "dependsOn": [
-    "[resourceId('Microsoft.Web/sites/slots', parameters('siteName'), 'staging')]"
+      "[resourceId('Microsoft.Web/sites/slots', parameters('siteName'), 'staging')]"
     ],
     "properties": {
-    "targetBuildVersion": "[parameters('sites_buildVersion')]"
+      "targetBuildVersion": "[parameters('sites_buildVersion')]"
     }
-}
+  }
 ]
 ```
 
-It is important for the sites deployment (the 2nd resource in the template above) to depends on the slot, so that the slot portion got deployed before the sites. That is to making sure that the slot is marked `Ver.aaa` before the swap, which is going to seek for a slot with the given `buildVersion`, happens.
+**Note:** It’s crucial for the second resource (`Microsoft.Web/sites`) to depend on the slot resource to ensure the slot is marked with the `buildVersion` before the swap occurs.
 
-And that's how to do a swap by using ARM template.
+## Combo Swap with New Version Deployment
 
-## Combo swap with new version deployment
+You can also deploy new application binaries to the slot and automatically swap them afterward. Although this approach skips the test of the new versions in the staging slot, you can quickly revert to the previous version if something goes wrong.
 
-Putting things together, it is possible to deploy the newer binaries of the application into the slow, and auto-swap right after it.
-
-One question to that approach is why slot then? Well, to the least, you will have the capability to swap back if something goes south.
-
-Here's the updated portion of the slot template:
+Here’s how to update the slot template to include new version deployment and swapping:
 
 ```jsonc
 {
-    "type": "Microsoft.Web/sites/slots",
-    "apiVersion": "2018-02-01",
-    "name": "[concat(parameters('siteName'), '/staging')]",
-    "location": "[variables('location')]",
-    "properties": {
+  "type": "Microsoft.Web/sites/slots",
+  "apiVersion": "2018-02-01",
+  "name": "[concat(parameters('siteName'), '/staging')]",
+  "location": "[variables('location')]",
+  "properties": {
     "buildVersion": "[parameters('sites_buildVersion')]"
-    },
-    "resources": [
+  },
+  "resources": [
     {
-        "type": "Extensions",
-        "apiVersion": "2022-09-01",
-        "name": "onedeploy",
-        "properties": {
+      "type": "Extensions",
+      "apiVersion": "2022-09-01",
+      "name": "onedeploy",
+      "properties": {
         "packageUri": "https://xm7732public.blob.core.windows.net/public/arm-swap-examples/v2.zip",
         "type": "zip"
-        },
-        "dependsOn": [
+      },
+      "dependsOn": [
         "[concat('Microsoft.Web/sites/', parameters('siteName'), '/slots/staging')]"
-        ]
+      ]
     }
-    ]
-},
+  ]
+}
 ```
+
+This updated template includes both the deployment of the new application package and the setup for swapping the staging slot.
+
+## Conclusion
+
+You’ve now learned how to swap App Service slots using ARM templates, including how to manage build versions and automate the process of deploying and swapping slots. This approach provides a robust way to test and deploy updates with minimal downtime and risk.
+
+Feel free to leave any questions or comments by using `Issues`.
