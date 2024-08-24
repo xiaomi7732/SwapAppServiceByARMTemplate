@@ -7,7 +7,7 @@
       "type": "String"
     },
     "sites_buildVersion": {
-      "defaultValue": "Ver.aaa",
+      "defaultValue": "v2",
       "type": "String"
     }
   },
@@ -22,7 +22,21 @@
       "location": "[variables('location')]",
       "properties": {
         "buildVersion": "[parameters('sites_buildVersion')]"
-      }
+      },
+      "resources": [
+        {
+          "type": "Extensions",
+          "apiVersion": "2022-09-01",
+          "name": "onedeploy",
+          "properties": {
+            "packageUri": "https://xm7732public.blob.core.windows.net/public/arm-swap-examples/v2.zip",
+            "type": "zip"
+          },
+          "dependsOn": [
+            "[concat('Microsoft.Web/sites/', parameters('siteName'), '/slots/staging')]"
+          ]
+        }
+      ]
     },
     {
       "type": "Microsoft.Web/sites",

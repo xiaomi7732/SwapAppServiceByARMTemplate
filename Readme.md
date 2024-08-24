@@ -4,6 +4,11 @@ I’ve been exploring a straightforward method to deploy a `.NET 8` application 
 
 Initially, I thought it would be easy to find guidance on this topic and expected to find a comprehensive post. To my disappointment, I found little information available. Driven by the need for clarity and simplicity, I decided to write this post to fill the gap and provide a clear example for others in the same situation.
 
+I am also covering the following topics, feel free to jump right in:
+
+* [Deploy .NET 8 application to a specific slot using ARM template](./DeployToSlot.md)
+* [Swap the slots using ARM template](./SwapSlot.md)
+
 ## Prerequisite
 
 1. Prepare the Application:
