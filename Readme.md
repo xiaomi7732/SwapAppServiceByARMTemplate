@@ -1,13 +1,14 @@
 # Deploying a .NET 8 Application to Linux Azure App Service with ARM Templates: A Step-by-Step Guide
 
+This is a series post. We are covering these topis around ARM template deployment for .NET 8 applications:
+
+* Deploy to Azure App Service - this post, keep reading
+* [Deploy to a slot of the Azure App Service](./DeployToSlot.md)
+* [Swap the slots](./SwapSlot.md)
+
 I’ve been exploring a straightforward method to deploy a `.NET 8` application to a Linux Azure App Service using an ARM template. My goal was to streamline the deployment process by avoiding the use of the [az webapp CLI](https://learn.microsoft.com/en-us/cli/azure/webapp/deployment?view=azure-cli-latest), which involves interactive steps. By using ARM templates, I aimed for a fully automated solution, perfect for remote environments like build pipelines.
 
 Initially, I thought it would be easy to find guidance on this topic and expected to find a comprehensive post. To my disappointment, I found little information available. Driven by the need for clarity and simplicity, I decided to write this post to fill the gap and provide a clear example for others in the same situation.
-
-I am also covering the following topics, feel free to jump right in:
-
-* [Deploy .NET 8 application to a specific slot using ARM template](./DeployToSlot.md)
-* [Swap the slots using ARM template](./SwapSlot.md)
 
 ## Prerequisite
 
@@ -147,42 +148,6 @@ az deployment group create -n manual-deploy -g $rgName --template-file .\initial
 ## Next Steps
 
 * [Deploying a .NET 8 Application to an Azure App Service Slot with ARM Templates: A Step-by-Step Guide](./DeployToSlot.md)
+* [Swapping App Service Slots with ARM Templates: A Step-by-Step Guide](./SwapSlot.md)
 
-## THE END
-
-## The rest are the drafts for myself.
-
-## Publish the website locally
-
-```shell
-dotnet publish -c Release
-```
-
-```shell
-MyAPI C:\AIR\DeployAppServiceBreakDown\src\MyAPI\bin\Release\net8.0\publish\
-```
-
-```shell
-Compress-Archive C:\AIR\DeployAppServiceBreakDown\src\MyAPI\bin\Release\net8.0\publish\* ..\..\out\v1.zip
-```
-
-```shell
-Compress-Archive C:\AIR\DeployAppServiceBreakDown\src\MyAPI\bin\Release\net8.0\publish\* ..\..\out\v2.zip
-```
-
-Download urls
-
-```shell
-https://xm7732public.blob.core.windows.net/public/arm-swap-examples/v1.zip
-https://xm7732public.blob.core.windows.net/public/arm-swap-examples/v2.zip
-```
-
-```shell
-$rgName="Swap-example-2"
-az group create -n $rgName --location "West US"
-```
-
-```json
-az deployment group create -n swapdemo -g $rgName --template-file .\initial.json
-az deployment group create -n swapdemo -g $rgName --template-file .\swap.json
-```
+⭐ Star this repo if you like the content.

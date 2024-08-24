@@ -79,6 +79,6 @@ Ensure you have an existing App Service deployed. We will deploy a new version o
 
 ## Conclusion
 
-By following these steps, you’ve successfully deployed your .NET 8 application to a staging slot in Azure App Service. This approach allows you to test new versions of your app in an isolated environment before they go live. In the next post, we'll dive into how to swap the staging slot with the production environment using ARM templates, completing the deployment workflow.
+By following these steps, you’ve successfully deployed your .NET 8 application to a staging slot in Azure App Service. This approach allows you to test new versions of your app in an isolated environment before they go live. In the [next post](./SwapSlot.md), we'll dive into how to swap the staging slot with the production environment using ARM templates, completing the deployment workflow.
 
-Feel free to leave any questions or comments by using the issues.
+Feel free to leave any questions or comments by using the issues. Star this repo if you like the content.
