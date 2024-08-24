@@ -1,76 +1,78 @@
 # Deploying a .NET 8 Application to an Azure App Service Slot with ARM Templates: A Step-by-Step Guide
 
-In my previous post, we covered deploying a .NET 8 application to an Azure App Service using ARM templates. If you missed it, you can read it [here](./Readme.md). Today, we’ll take the next step by deploying an application to a specific slot within the App Service.
+In my previous post, we explored how to deploy a .NET 8 application to an Azure App Service using ARM templates. If you missed it, you can catch up [here](./Readme.md). Today, we’ll advance by deploying an application to a specific slot within the App Service.
 
-Deploying to a slot allows you to test new versions of your app in an isolated environment before moving them into production. In the upcoming post, we'll explore how to swap this slot with the production environment using ARM templates.
+Deploying to a slot provides a staging environment to test new versions of your app before moving them to production. In the next post, we’ll cover how to swap this staging slot with the production environment using ARM templates.
 
-If you prefer to take a look at the template on your own, refer to [staging-slot.json](./ARM/staging-slot.json)
+For those who prefer to dive directly into the template, you can view it [here](./ARM/staging-slot.json).
 
 ## Prerequisites
 
-Ensure you have an existing App Service deployed. We will be deploying a new version of the application to a slot, such as a staging slot, as illustrated below:
+Ensure you have an existing App Service deployed. We will deploy a new version of the application to a slot, such as a staging slot, as shown below:
 
 ![slot](./imgs/AfterSwap.png)
 
 ## Steps
 
-1. Prepare the Application
+1. **Prepare the Application**
 
-    Refer to [Prepare the Application](./Readme.md#prerequisite) to build and upload the application. Edit the source code to output text `Hello World! v2` for example, and get the package of `v2.zip` uploaded to the blob storage:
+   Refer to [Prepare the Application](./Readme.md#prerequisite) to build and upload the application. Update the source code to output a text like `Hello World! v2` and upload the `v2.zip` package to blob storage:
 
-    ```
-    https://xm7732public.blob.core.windows.net/public/arm-swap-examples/v2.zip
-    ```
+   ```
+   https://xm7732public.blob.core.windows.net/public/arm-swap-examples/v2.zip
+   ```
 
-1. Create an ARM template to deploy an empty stage:
+2. **Create an ARM Template for the Staging Slot**
 
-    ```jsonc
-    {
-      "type": "Microsoft.Web/sites/slots",
-      "apiVersion": "2018-02-01",
-      "name": "[concat(parameters('siteName'), '/', parameters('slotName'))]",
-      "location": "[variables('location')]",
-      "properties": {
-      }
-    }
-    ```
+   Use the following ARM template to create an empty staging slot:
 
-    Notice, the name of the slot in form of `siteName/slotName`, and make sure the site name is correct.
+   ```jsonc
+   {
+     "type": "Microsoft.Web/sites/slots",
+     "apiVersion": "2018-02-01",
+     "name": "[concat(parameters('siteName'), '/', parameters('slotName'))]",
+     "location": "[variables('location')]",
+     "properties": {}
+   }
+   ```
 
-1. Append package to deploy, by using `onedeploy` extension again:
+   Note: Ensure the `name` property is in the format `siteName/slotName` and that the site name is correct.
 
-    ```jsonc
-    {
-        "type": "Extensions",
-        "apiVersion": "2022-09-01",
-        "name": "onedeploy",
-        "properties": {
-        "packageUri": "https://xm7732public.blob.core.windows.net/public/arm-swap-examples/v2.zip",
-            "type": "zip"
-        },
-        "dependsOn": [
-            "[concat('Microsoft.Web/sites/', parameters('siteName'),'/slots/', parameters('slotName'))]"
-        ]
-    }
-    ```
+3. **Deploy the Application Package Using the `onedeploy` Extension**
 
-    The key here is the form up the correct dependency declare.
+   Add the following configuration to deploy the application package:
 
-1. Deploy the ARM template for testing
+   ```jsonc
+   {
+     "type": "Extensions",
+     "apiVersion": "2022-09-01",
+     "name": "onedeploy",
+     "properties": {
+       "packageUri": "https://xm7732public.blob.core.windows.net/public/arm-swap-examples/v2.zip",
+       "type": "zip"
+     },
+     "dependsOn": [
+       "[concat('Microsoft.Web/sites/', parameters('siteName'), '/slots/', parameters('slotName'))]"
+     ]
+   }
+   ```
 
-    Once ready, let's deploy the template:
+   The key here is to correctly declare the dependency on the slot resource.
 
-    ```powershell
-    # login first
-    az login
-    # you might want to setup your subscription
-    az account set -s 'Your Subscription Name'
+4. **Deploy the ARM Template**
 
-    # Define the resource group name, making sure it is correct
-    $rgName="my-dotnet8-app-demo" 
+   Deploy the ARM template using the following PowerShell commands:
 
-    # Start the deployment
-    az deployment group create -n manual-deploy -g $rgName --template-file .\staging-slot.json
-    ```
+   ```powershell
+   # Log in to Azure
+   az login
 
+   # Set your subscription (if needed)
+   az account set -s 'Your Subscription Name'
 
+   # Define the resource group name
+   $rgName = "my-dotnet8-app-demo"
+
+   # Start the deployment
+   az deployment group create -n manual-deploy -g $rgName --template-file .\staging-slot.json
+   ```
