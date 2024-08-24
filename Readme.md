@@ -139,6 +139,10 @@ az group create -n $rgName --location $location
 az deployment group create -n manual-deploy -g $rgName --template-file .\initial.json
 ```
 
+## Next Steps
+
+* [Deploying a .NET 8 Application to an Azure App Service Slot with ARM Templates: A Step-by-Step Guide](./DeployToSlot.md)
+
 ## THE END
 
 ## The rest are the drafts for myself.
